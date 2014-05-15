@@ -1,6 +1,7 @@
 import os
 
 from asset import Asset
+from j3m import J3M
 
 class Collection(Asset):
 	def __init__(self, inflate=None, _id=None, reindex=False):
@@ -10,21 +11,26 @@ class Collection(Asset):
 			
 			inflate = self.massageData(inflate)
 		
-		# submissions, sensor_captures
-		super(Collection, self).__init__(inflate=inflate, _id=_id, river="collections")
+		super(Collection, self).__init__(inflate=inflate, _id=_id, river="collections", extra_omits=['j3m'])
+		
+		if hasattr(self, "j3m_id") and self.j3m_id is not None:
+			self.j3m = J3M(_id=self.j3m_id)
 	
 	def massageData(self, inflate):
-
-		
 		try:
-			sensor_captures = inflate['sensor_captures']
-			del inflate['sensor_captures']
+			submissions = inflate['attached_media']
+			from submission import Submission
 			
-			for sensor_capture in sensor_captures:
-				print sensor_capture
+			contributors = []
+			for s in submissions:
+				submission = Submission(_id=s)
+				print submission.emit()
 				
-					
-				# copy over to /data
+				contributors.append(
+					submission.j3m.genealogy['createdOnDevice'])
+			
+			inflate['contributors'] = list(set(contributors))
+			
 		except KeyError as e:
 			print e
 			pass
