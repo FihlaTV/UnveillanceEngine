@@ -39,8 +39,8 @@ class Elasticsearch():
 		res = json.loads(r.text)
 		
 		try:
-			print res['ok']
-			return res['ok']
+			print res['created']
+			return res['created']
 		except KeyError as e:
 			print r.text
 			return False
